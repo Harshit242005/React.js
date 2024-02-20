@@ -1,16 +1,27 @@
 import './App.css'
-import { useDispatch, useSelector } from 'react-redux';
-import { incrementAction, decrementAction } from './Action'; // Import your action creators
 
+
+// setting up the navigation bar
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import Counter from './Counter';
+import Landing from './Landing';
+import Signup from './Signup';
+import Login from './Login';
+import Interface from './Interface';
 
 function App() {
-  const counter = useSelector((state) => state.counter); // Assuming 'counter' is a slice of state
-  const dispatch = useDispatch();
+
   return (
     <>
-       <p>Counter: {counter}</p>
-       <button onClick={() => dispatch(incrementAction())}>Increment</button>
-      <button onClick={() => dispatch(decrementAction())}>Decrement</button>
+      <Router>
+        <Routes>
+          <Route path='/' element={<Landing />} />
+          <Route path='/Counter' element={<Counter />} />
+          <Route path='/Login' element={<Login />} />
+          <Route path='/Signup' element={<Signup />} />
+          <Route path='/Interface' element={<Interface />} />
+        </Routes>
+      </Router>
     </>
   )
 }
