@@ -7,7 +7,17 @@ const MongoClient = require('mongodb').MongoClient;
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+
 const app = express();
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const httpServer = createServer(app);
+
+const io = new Server(httpServer, {
+    cors: {
+      origin: "http://localhost:5173"
+    }
+  });
 // Middleware
 app.use(cors());
 const payloadSizeLimit = '10mb';
@@ -15,6 +25,35 @@ const payloadSizeLimit = '10mb';
 // Use bodyParser with payload size limit
 app.use(bodyParser.json({ limit: payloadSizeLimit }));
 const port = 3000;
+
+
+// WebSocket handling
+const activeConnections = new Set();
+
+io.on('connection', (socket) => {
+  console.log('New user connected');
+
+  socket.on('login', (userId) => {
+    console.log(`User ${userId} logged in`);
+    activeConnections.add(userId);
+    io.emit('activeUsers', Array.from(activeConnections));
+  });
+
+  socket.on('disconnect', () => {
+    // Handle disconnection
+    // Remove the user from the active connections set
+    const userId = getUserIdFromSocket(socket);
+    activeConnections.delete(userId);
+    io.emit('activeUsers', Array.from(activeConnections));
+  });
+});
+
+function getUserIdFromSocket(socket) {
+  // Extract and return the user ID from the socket, you may need to adapt this based on your authentication mechanism
+  return socket.userId;
+}
+
+
 
 // Signup route
 app.post('/Signup', async (req, res) => {
@@ -29,7 +68,7 @@ app.post('/Signup', async (req, res) => {
 
     // Convert the image to base64
     const imageBase64 = profileImage ? profileImage.toString('base64') : null;
-    console.log('image base64 data is: ', imageBase64);
+    //console.log('image base64 data is: ', imageBase64);
 
     // Hash the password with bcrypt
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -71,6 +110,8 @@ app.post('/Login', async (req, res) => {
             if (passwordMatch) {
                 // Passwords match, send the user document as the respon
                 console.log('login successful');
+                // get the object id and make it string and pass it in the websocket for login 
+                io.emit('login', user._id.toString());
                 res.status(200).json({ user });
             } else {
                 // Passwords don't match
@@ -86,6 +127,8 @@ app.post('/Login', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
 
 // Start the server
 app.listen(port, () => {

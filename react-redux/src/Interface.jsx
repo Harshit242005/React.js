@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 // for loging out of the application
 import { logout } from './Action';
+import User from './User';
 
 function Interface() {
     const userData = useSelector((state) => state.auth.userData);
@@ -11,8 +12,9 @@ function Interface() {
    
     return (
         <>
-        <div>{userData ? `Welcome, ${userData.user.Username}!` : 'Not logged in'}</div>
-        {userData && <button onClick={() => {dispatch(logout())}}>Logout</button>}
+        {/* <div>{userData ? `Welcome, ${userData.user.Username}!` : 'Not logged in'}</div>
+        {userData && <button onClick={() => {dispatch(logout())}}>Logout</button>} */}
+        <User />
         </>
     )
 }
