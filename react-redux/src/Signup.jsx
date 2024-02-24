@@ -34,7 +34,7 @@ function Signup() {
     const sendData = async () => {
         
         try {
-            const response = await axios.post('http://localhost:3000/Signup', {
+            const response = await axios.post('http://localhost:3001/Signup', {
                 'profileImage': profileImage,
                 'username': username,
                 'password': password

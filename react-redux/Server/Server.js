@@ -24,10 +24,11 @@ const payloadSizeLimit = '10mb';
 
 // Use bodyParser with payload size limit
 app.use(bodyParser.json({ limit: payloadSizeLimit }));
-const port = 3000;
+const port = 3001;
 
 
-// WebSocket handling
+// WebSocket handling [ it should be map so we can map the user object id from the database to the generated id from the connection time ]
+
 const activeConnections = new Set();
 
 io.on('connection', (socket) => {
@@ -36,7 +37,13 @@ io.on('connection', (socket) => {
   socket.on('login', (userId) => {
     console.log(`User ${userId} logged in`);
     activeConnections.add(userId);
-    io.emit('activeUsers', Array.from(activeConnections));
+    console.log(activeConnections);
+    socket.emit('activeUsers', Array.from(activeConnections));
+  });
+
+  socket.on('testCall', () => {
+    console.log('test call back has been called by the user');
+    socket.emit('testCallRece');
   });
 
   socket.on('disconnect', () => {
@@ -111,7 +118,7 @@ app.post('/Login', async (req, res) => {
                 // Passwords match, send the user document as the respon
                 console.log('login successful');
                 // get the object id and make it string and pass it in the websocket for login 
-                io.emit('login', user._id.toString());
+                //socket.emit('login', user._id.toString());
                 res.status(200).json({ user });
             } else {
                 // Passwords don't match
@@ -129,7 +136,8 @@ app.post('/Login', async (req, res) => {
 });
 
 
-
+// http server listening endpoint
+httpServer.listen(3000);
 // Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

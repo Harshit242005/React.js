@@ -5,16 +5,20 @@ import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { loginSuccess, loginFailure } from './Action';
 import { Link } from 'react-router-dom';
+//import io from 'socket.io-client';
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const [navigate, setNavigate] = useState(false);
+
+  //const socket = io('http://localhost:3000'); 
+  
   
   const handleLogin = async () => {
     try {
       // Simulating an API call for login
-      const response = await axios.post('http://localhost:3000/Login', {
+      const response = await axios.post('http://localhost:3001/Login', {
         'username': username,
         'password': password
       });
@@ -22,6 +26,10 @@ function Login() {
       const userData = response.data;
 
       if (response.status == 200) {
+        console.log(userData);
+        console.log(userData.user);
+        console.log(userData.user._id.toString());
+        
         dispatch(loginSuccess(userData));
         // navigate to the Interface
         setNavigate(true);
