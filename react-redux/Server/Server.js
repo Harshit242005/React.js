@@ -32,7 +32,7 @@ const port = 3001;
 const activeConnections = new Set();
 
 io.on('connection', (socket) => {
-  console.log('New user connected');
+  console.log('New user connected with the socket id: ', socket.id);
 
   socket.on('login', (userId) => {
     console.log(`User ${userId} logged in`);

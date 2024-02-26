@@ -1,0 +1,25 @@
+.interface_room_buttons
+{
+    width: 200px;
+    height: 50px;
+    background-color: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.401);
+    border-radius: 5px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.interface_room_buttons:focus
+{
+    outline: none;
+}
+
+.interface_room_buttons:hover
+{
+    background-color: black;
+    color: white;
+    border: none;
+}
