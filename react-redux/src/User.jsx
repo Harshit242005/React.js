@@ -1,50 +1,70 @@
 // this is your component
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import styles from './Styles/User.module.css'
 import { useState, useEffect } from 'react';
+import { setSocketId } from './Action';
 // // for loging out of the application
 // import { logout } from './Action';
 import io from 'socket.io-client';
+import useSocket from './useSocket';
+
 
 function User() {
     const userData = useSelector((state) => state.auth.userData);
+
     console.log(userData);
-    const [ showOptions ,setShowOptions] = useState(false);
-    const [ currentState, setCurrentState ] = useState('');
+    const { socketId } = useSocket();
+    const [showOptions, setShowOptions] = useState(false);
+    const [currentState, setCurrentState] = useState('');
+    const dispatch = useDispatch();
 
-   
 
-    // const [activeUsers, setActiveUsers] = useState([]);
-    
+
+    const setActivityState = (activity) => {
+        console.log(`current state: ${activity}`);
+        setCurrentState(activity);
+
+       
+        console.log(`socket id for connection is: ${socketId}`);
+        const change_state_socket = io('http://localhost:3000');
+        change_state_socket.on('connect', () => {
+            // emit the state for the changes 
+            change_state_socket.emit('changeState', socketId, activity);
+        });
+        setShowOptions(false);
+    }
+
 
     useEffect(() => {
         // Connect to the Socket.IO server
         const socket = io('http://localhost:3000');
 
-        // Emit login event
-        socket.emit('login', userData.user._id.toString());
+        // Listen for the 'connect' event
+        socket.on('connect', () => {
+            // Now, socket.id is available
+            const socketId = socket.id;
+            console.log('connected user id: ', socketId);
+            // calling for the actions to set the id for the actions
+            dispatch(setSocketId(socketId));
 
-        // Event listeners
-        socket.on('testCallRece', () => {
-            console.log('test call back has been received from server');
+            // Emit login event
+            socket.emit('login', socketId, userData.user._id.toString());
         });
-
-        
 
         socket.on('activeUsers', (data) => {
             console.log(data);
-            // setActiveUsers(data);
+
+
         });
-
-
 
         // Clean up the socket connection on component unmount
         return () => {
             socket.disconnect();
         };
-    }, [userData.user._id]); // Dependency ensures this effect runs only once on mount
+    }, [userData.user._id, dispatch]); // Dependency ensures this effect runs only once on mount
 
-    
+
+
 
 
     return (
@@ -72,15 +92,14 @@ function User() {
             </div>
 
             {
-                showOptions && 
-                <div>
+                showOptions &&
+                <div className={styles.selectState}>
                     <p>Select current state</p>
-                <div>
-                    <button onClick={() => setCurrentState('Active')}>Active</button>
-                    <button onClick={() => setCurrentState('Inactive')}>inactive</button>
-                    <button onClick={() => setCurrentState('Break')}>Break</button>
-                   
-                </div>
+                    <div className={styles.stateButtons}>
+                        <button onClick={() => setActivityState('Active')}>Active</button>
+                        <button onClick={() => setActivityState('Inactive')}>inactive</button>
+                        <button onClick={() => setActivityState('Break')}>Break</button>
+                    </div>
                 </div>
             }
 

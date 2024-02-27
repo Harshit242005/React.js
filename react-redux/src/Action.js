@@ -22,3 +22,10 @@ export const loginFailure = () => ({
 export const logout = () => ({
   type: 'LOGOUT',
 });
+
+
+// listening for the socketId
+export const setSocketId = (socketId) => ({
+  type: 'SET_SOCKET_ID',
+  payload: socketId,
+});

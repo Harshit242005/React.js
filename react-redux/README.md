@@ -12,3 +12,21 @@ structure =
 room_id: [created_person_id, created_at, [ids_of_the_connected_user]]     { this would be stored in the map of active rooms }
 person_id: [ room_id, status, joined_at]  { this would be stored in the active pool of the users who are online }
 
+person_id: [ room_id, status, joined_at]  { this would be stored in the active pool of the users who are online }
+the followed read me file for the socket.io application
+-  running up the updates on the structure of the user id with which is is going to connect
+
+socketIO_ID: [person_id, status, room_id]
+in the map we would name it person_id
+Initially we would connect with the socket_id: [person_id]
+- state would also be managed under the redux for better purposes 
+
+// setActiveUsers(data);
+const socketId = useSelector((state) => state.socket.socketId);
+- creating a room and hiding all the other data and showing room members 
+- UI/Ux design for the select state menagement
+
+
+let's the user create the room from his name and check if the room is created already exist and if ytes check if this is created by another person or not and if yes then ask for some another name and if not then create the room
+structure 
+room_name: [creator_id_socket_id, [members_socket_id]]
