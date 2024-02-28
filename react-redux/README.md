@@ -30,3 +30,9 @@ const socketId = useSelector((state) => state.socket.socketId);
 let's the user create the room from his name and check if the room is created already exist and if ytes check if this is created by another person or not and if yes then ask for some another name and if not then create the room
 structure 
 room_name: [creator_id_socket_id, [members_socket_id]]
+
+
+- after creating the room there should be a different interface 
+- room name should be saved in the redux so i can use it anywhere else in my code as well
+- create a room action and listen for the change of either create room or join room as well 
+- how we would be differenting the joinnes and the ones who have created the room itself
