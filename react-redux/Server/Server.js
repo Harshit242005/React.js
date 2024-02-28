@@ -76,13 +76,25 @@ io.on('connection', (socket) => {
     }
     else {
       activeRooms.set(roomName, []);
+      console.log(activeRooms);
       // get the list and add value in that list
-      const room_list = activeConnections.get(roomName);
+      const room_list = activeRooms.get(roomName);
       room_list.push(socketId);
       room_list.push([]);
-      print(activeRooms);
+      console.log(activeRooms);
     }
 
+    socket.emit('createdRoom', roomName);
+
+  });
+
+  socket.on('remove_room', (socketId, roomName) => {
+    console.log('removing room');
+    console.log(socketId, roomName);
+
+    if (activeRooms.has(roomName)) {
+      // remove the user 
+    }
   });
 
 

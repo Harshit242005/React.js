@@ -2,23 +2,37 @@
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './Styles/User.module.css'
 import { useState, useEffect } from 'react';
-import { setSocketId } from './Action';
+import { setSocketId, existInRoom } from './Action';
 // // for loging out of the application
 // import { logout } from './Action';
 import io from 'socket.io-client';
 import useSocket from './useSocket';
-
+import useRoom from './useRoom';
 
 function User() {
     const userData = useSelector((state) => state.auth.userData);
-
+    const exist = useSelector((state) => state.exist.existInRoom);
     console.log(userData);
     const { socketId } = useSocket();
+    const { roomName } = useRoom();
     const [showOptions, setShowOptions] = useState(false);
     const [currentState, setCurrentState] = useState('');
     const dispatch = useDispatch();
 
 
+    // leave room function 
+    const LeaveRoom = () => {
+        //  send the actions for deleting the room
+        dispatch(LeaveRoom(false));
+
+        const remove_room = io('http://localhost:3000');
+        // connect with server
+        remove_room.om('connect', () => {
+            // send room name and socket id
+            console.log(`removing from room socket id is: ${socketId} and room name is: ${roomName}`);
+            remove_room.emit('remove_room', (socketId, roomName));
+        });
+    }
 
     const setActivityState = (activity) => {
         console.log(`current state: ${activity}`);
@@ -85,7 +99,13 @@ function User() {
                             </div>
                             {userData.user.Username}
                         </div>
+                        <div>
+                            {exist && 
+                            <button onClick={LeaveRoom}>Leave</button>
+                            }
+                            {/* give button to leave the current room */}
                         <button onClick={() => setShowOptions(true)} className={styles.statusButton}>{currentState}</button>
+                        </div>
                     </div>
                     :
                     <div>Not logged in</div>}

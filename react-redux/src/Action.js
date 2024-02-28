@@ -29,3 +29,21 @@ export const setSocketId = (socketId) => ({
   type: 'SET_SOCKET_ID',
   payload: socketId,
 });
+
+// listening for the room name
+export const RoomName = (roomName) => ({
+  type: 'AddRoom',
+  payload: roomName
+});
+
+// listening for either room create or joining the room
+export const existInRoom = (existRoom) => ({
+  type: 'ExistInRoom',
+  payload: existRoom
+});
+
+// listening for setting access
+export const accessRoom = (accessType) => ({
+  type: 'SetAccess',
+  payload: accessType
+});
