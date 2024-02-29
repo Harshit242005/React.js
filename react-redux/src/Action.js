@@ -47,3 +47,9 @@ export const accessRoom = (accessType) => ({
   type: 'SetAccess',
   payload: accessType
 });
+
+// listen for the members 
+export const Member = (members) => ({
+  type: 'SetMembers',
+  payload: members
+});

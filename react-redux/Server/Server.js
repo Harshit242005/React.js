@@ -93,7 +93,59 @@ io.on('connection', (socket) => {
     console.log(socketId, roomName);
 
     if (activeRooms.has(roomName)) {
-      // remove the user 
+      // remove the room
+      // get the member list first 
+      const member_list = activeRooms.get(roomName)[1];
+      console.log(`member list is: ${member_list}`);
+      
+
+      activeRooms.delete(roomName); 
+      console.log('room has been deleted successfully');
+    }
+    else {
+      console.log('room does not exist for deleting');
+    }
+  });
+
+  socket.on('leave_room', (socketId, roomName) => {
+    console.log('leaving room');
+    console.log(socketId, roomName);
+  
+    if (activeRooms.has(roomName)) {
+      // leave the user
+      const member_list = activeRooms.get(roomName);
+  
+      // Check if the socketId exists in the member list
+      const index = member_list[1].indexOf(socketId);
+      if (index !== -1) {
+        // Remove the socketId from the member list
+        member_list[1].splice(index, 1);
+        socket.emit('members', Array.from(member_list));
+        console.log(`User with socketId ${socketId} left the room ${roomName}`);
+      } else {
+        console.log('socketId does not exist in the member list');
+      }
+    } else {
+      console.log('room does not exist for deleting');
+    }
+  });
+  
+
+  // join the room 
+  socket.on('joining_room', (room_name, socketId) => {
+    console.log(`room name is: ${room_name} and socket id is: ${socketId}`);
+    if (activeRooms.has(room_name)) {
+      // room exist in the active rooms names 
+      const member_list = activeRooms.get(room_name);
+      member_list[1].push(socketId);
+
+      socket.emit('joined_room', room_name);
+      // send all the member id to all the connected clinet 
+      // so they can reflect the changes in it 
+      socket.emit('members', Array.from(member_list));
+    }
+    else {
+      socket.emit('error_joining_room', 'Error joining errom! Room does not exist');
     }
   });
 

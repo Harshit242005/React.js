@@ -4,7 +4,7 @@ const initialState = {
 
 const existInRoom = (state = initialState, action) => {
     switch (action.type) {
-        case '':
+        case 'ExistInRoom':
             return {
                 ...state,
                 existInRoom: action.payload

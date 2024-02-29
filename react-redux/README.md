@@ -36,3 +36,29 @@ room_name: [creator_id_socket_id, [members_socket_id]]
 - room name should be saved in the redux so i can use it anywhere else in my code as well
 - create a room action and listen for the change of either create room or join room as well 
 - how we would be differenting the joinnes and the ones who have created the room itself
+
+
+
+- show the room status and hide the join room and create room session 
+- an according to access level room either would be destroyed or person would be removed
+- all of these actios should be happing in real time 
+- while creating the room there should be a the person access level should also be associated with him
+- while creating the roowm the access level should be Owner and should be inserted somewhere so i can use it there
+ [ so i am calling the redux to store and manage the stage of the ongoing values as auth type ]
+- initial state should be passed down to the user account 
+- implement join feature in my application to join the room
+- implement the show member feature by loading all the member id's in the array object in a reducer so i can render them and get their data using useffect and their status 
+
+Joining room 
+we have to emit the added member each time a person changes involves in the members or get out of it so it can reflect in real time 
+
+remove from the room 
+- if leader just remove the whole key value pair
+- if member remove the member from the members array
+
+- send members list to the front end by sending the emit 
+when a person remove the room completely he should be get out and reflect to all the connected members that room has been removed 
+use a for loop instead 
+
+currently creating a context for getting the saved members list and showing it off 
+
