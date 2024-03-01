@@ -62,3 +62,33 @@ use a for loop instead
 
 currently creating a context for getting the saved members list and showing it off 
 
+- successfully adding the members in the room and reflecting them
+- testing the leave/remove room feature in the application
+- show each members data from connection members and compare them and reflect them in the change as well
+
+First test out the application and look for possible improvement areas and problems we currently have 
+
+- changing the styles of landing [ solved ] 
+- conditional rendering of the leave room causing a gap error on the styles which is not giving us the correct visiuals when user have not joined any room yet  [ solved ]
+- change the styles related to the create room for now [ changed ]
+- let's look in the Join function and see if it's working correctly or not at the initial start or not 
+[ 
+- understanding about the emit for members and sending the ids 
+]
+leave room should also reflect the changes in the ID'S
+[
+- when room is removed from the active rooms from the leader himeself then we have to cancel the room and remove all the ids from that members array as well 
+- we should be implementing a room status to change the status of the room when it's leaved or been removed 
+- defining the leave room feature and how it's going to effect it 
+
+question ?
+[ 
+- how after removing from the room each person would be get reflected from the change that user has been out 
+- how the user internal state change would be reflected in the room alos if the user exist in the room 
+--- solution
+- when user join the room his room name would also get append in the array of the active connections which is storing the chages related to the user state 
+
+]
+
+showing off the user data in the viewable form in the room members get then ids from the state and get data from the mongodb connection 
+- the reflection if the member list is not reflecting in the 

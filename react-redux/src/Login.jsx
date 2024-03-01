@@ -1,5 +1,5 @@
 // Login.js
-
+import styles from './Styles/Login.module.css';
 import  { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
@@ -44,21 +44,23 @@ function Login() {
   };
 
   return (
-    <div>
+    <div className={styles.body}>
         {navigate && <Link to="/Interface"><button>Interface</button></Link>}
       <input
+      className={styles.inputBox}
         type="text"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         placeholder="Type username..."
       />
       <input
+      className={styles.inputBox}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         type="password"
         placeholder="Type password"
       />
-      <button onClick={handleLogin}>Login</button>
+      <button className={styles.loginButton} onClick={handleLogin}>Login</button>
     </div>
   );
 }

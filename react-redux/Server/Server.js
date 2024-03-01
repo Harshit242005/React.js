@@ -82,6 +82,10 @@ io.on('connection', (socket) => {
       room_list.push(socketId);
       room_list.push([]);
       console.log(activeRooms);
+      // here should be conditions added in the adding of the created room name as the user data
+      // add the name in the end of the active connection
+      const user_data = activeConnections.get(socketId)
+      user_data.push(roomName);
     }
 
     socket.emit('createdRoom', roomName);
@@ -97,10 +101,16 @@ io.on('connection', (socket) => {
       // get the member list first 
       const member_list = activeRooms.get(roomName)[1];
       console.log(`member list is: ${member_list}`);
-      
 
-      activeRooms.delete(roomName); 
+
+      activeRooms.delete(roomName);
+      socket.emit('deleted_room', 'Room has been deleted successfully');
       console.log('room has been deleted successfully');
+
+      // add the name in the array of the active connections
+      const user_data_list = activeConnections.get(socketId);
+      user_data_list.pop();
+
     }
     else {
       console.log('room does not exist for deleting');
@@ -110,11 +120,11 @@ io.on('connection', (socket) => {
   socket.on('leave_room', (socketId, roomName) => {
     console.log('leaving room');
     console.log(socketId, roomName);
-  
+
     if (activeRooms.has(roomName)) {
       // leave the user
       const member_list = activeRooms.get(roomName);
-  
+
       // Check if the socketId exists in the member list
       const index = member_list[1].indexOf(socketId);
       if (index !== -1) {
@@ -122,6 +132,11 @@ io.on('connection', (socket) => {
         member_list[1].splice(index, 1);
         socket.emit('members', Array.from(member_list));
         console.log(`User with socketId ${socketId} left the room ${roomName}`);
+        // send an emit to get know that user has got the connect value
+        socket.emit('leaved_room', 'You have leaved the room successfully');
+        // add the name in the array of the active connections
+        const user_data_list = activeConnections.get(socketId);
+        user_data_list.pop();
       } else {
         console.log('socketId does not exist in the member list');
       }
@@ -129,7 +144,7 @@ io.on('connection', (socket) => {
       console.log('room does not exist for deleting');
     }
   });
-  
+
 
   // join the room 
   socket.on('joining_room', (room_name, socketId) => {
@@ -139,10 +154,20 @@ io.on('connection', (socket) => {
       const member_list = activeRooms.get(room_name);
       member_list[1].push(socketId);
 
+      // add the name in the array of the active connections
+      const user_data_list = activeConnections.get(socketId);
+      user_data_list.push(room_name);
+
+      // getting the members 
+      const members = member_list[1];
+      console.log(`members are: ${members}`);
       socket.emit('joined_room', room_name);
       // send all the member id to all the connected clinet 
       // so they can reflect the changes in it 
-      socket.emit('members', Array.from(member_list));
+      socket.emit('members', Array.from(members));
+
+      console.log(activeConnections);
+      console.log(activeRooms);
     }
     else {
       socket.emit('error_joining_room', 'Error joining errom! Room does not exist');

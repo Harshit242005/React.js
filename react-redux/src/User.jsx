@@ -27,24 +27,46 @@ function User() {
     const LeaveRoom = () => {
         const remove_room = io('http://localhost:3000');
         if (access === 'Leader') {
-            remove_room.om('connect', () => {
+            remove_room.on('connect', () => {
                 // send room name and socket id
                 console.log(`removing the room socket id is: ${socketId} and room name is: ${roomName}`);
                 remove_room.emit('remove_room', (socketId, roomName));
+
+                // listen for successful removing of the room
+                remove_room.on('deleted_room', (deleted_message) => {
+                    console.log(deleted_message);
+
+                    // send the dispatch functions in reverse
+                    dispatch(RoomName(null));
+                    dispatch(accessRoom(null));
+                    dispatch(existInRoom(true));
+                    
+                });
             });
         }
         else {
-            remove_room.om('connect', () => {
+            remove_room.on('connect', () => {
                 // send room name and socket id
                 console.log(`leaving from room socket id is: ${socketId} and room name is: ${roomName}`);
                 remove_room.emit('leave_room', (socketId, roomName));
+
+                // listen for successful leaving the room
+                remove_room.on('leaved_room', (leave_message) => {
+                    console.log(leave_message);
+                    // send the dispatch functions in reverse
+                    dispatch(RoomName(null));
+                    dispatch(accessRoom(null));
+                    dispatch(existInRoom(true));
+                })
             });
         }
-        // send action to not exist in the room
-        dispatch(existInRoom(false));
-        dispatch(RoomName(null));
-        dispatch(accessRoom(null));
-        //dispatch(LeaveRoom(false));
+        
+        // listen for the members array and sending the members 
+        remove_room.on('members', (ids_data) => {
+            console.log(`members ids: ${ids_data}`);
+            // dispatching Member action to add the data in the current state
+            dispatch(Member(ids_data));
+        });
     }
 
     const setActivityState = (activity) => {
@@ -104,7 +126,8 @@ function User() {
         <div>
             <div>
                 {userData ?
-                    <div className={styles.userComponent}>
+                    <div className={styles.userComponent}
+                    style={{gap: exist ? '700px': '900px'}}>
                         <div className={styles.userData}>
                             <div>
                                 {/* user image  */}

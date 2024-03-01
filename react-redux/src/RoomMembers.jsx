@@ -3,13 +3,12 @@ import useMembers from './useMembers';
 
 function RoomMembers() {
   const { members } = useMembers();
+  console.log(`members: ${members}`);
 
   return (
     <div>
       {members && members.length > 0 ? (
-        members.map((element, index) => (
-          <p key={index}>{element}</p>
-        ))
+        <div>{members}</div>
       ) : (
         <p>No one has joined the room yet</p>
       )}

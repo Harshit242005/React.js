@@ -64,9 +64,17 @@ function CreateRoom() {
                 <div>
                     <div>
                         <p>{error_message}</p>
-                        <input type="text" placeholder='Type name...' onChange={(e) => setRoomName(e.target.value)} />
-                        <button onClick={() => createSocket()}>Create</button>
-                        <button onClick={() => setOpenDialog(false)}>Close</button>
+                        <input type="text" placeholder='Type name...' 
+                        style={{width: '190px', height: '50px', backgroundColor: 'transparent', borderWidth: '0.25px', paddingLeft: '10px'}}
+                        onChange={(e) => setRoomName(e.target.value)} />
+                        <div style={{display: 'flex', flexDirection: 'row'}}>
+                        <button 
+                        style={{width: '100px', height: '40px', backgroundColor: 'transparent', borderRadius: '5px', borderWidth: '0.5px',}}
+                        onClick={() => createSocket()}>Create</button>
+                        <button         
+                        style={{width: '100px', height: '40px', backgroundColor: 'transparent', borderRadius: '5px', borderWidth: '0.5px',}}               
+                        onClick={() => setOpenDialog(false)}>Close</button>
+                        </div>
                     </div>
                 </div>
             }

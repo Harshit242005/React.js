@@ -1,30 +1,44 @@
 import React, { useState } from 'react'
 import styles from './Styles/InterfaceButtons.module.css';
 import { useDispatch } from 'react-redux';
-import { accessRoom, existInRoom, RoomName } from './Action';
+import { accessRoom, existInRoom, RoomName, Member } from './Action';
 import { io } from 'socket.io-client';
 import useSocket from './useSocket';
 
 function JoinRoom() {
-    const join_room = io('http://localhost:3000');
+    
     const [joining_room, setJoiningRoomName] = useState('');
-    const { socketId } = useSocket();
     const [openDialog, setOpenDialog] = useState(false);
     const [ error_join_room, setErrorJoinRoom ] = useState('');
+
     const dispatch = useDispatch();
+    const { socketId } = useSocket();
     const JoinRoom = () => {
-        dispatch(accessRoom('Member'));
-        dispatch(existInRoom(true));
+
+        const join_room = io('http://localhost:3000');
+        
 
         join_room.on('connect', () => {
-            join_room.on('join_room', (joining_room, socketId));
+            console.log(`joining room is: ${joining_room} and socket id: ${socketId}`);
+            
+            join_room.emit('joining_room', joining_room, socketId.toString());
 
             join_room.on('joined_room', (room_name) => {
                 console.log('successfully joined room', room_name);
+                // sending some dispatch functions 
                 dispatch(RoomName(room_name));
+                dispatch(accessRoom('Member'));
+                dispatch(existInRoom(true));
             });
 
-            join_room('error_joining_room', (error_message) => {
+            // listen for the members array and sending the members 
+            join_room.on('members', (ids_data) => {
+                console.log(`members ids: ${ids_data}`);
+                // dispatching Member action to add the data in the current state
+                dispatch(Member(ids_data));
+            });
+
+            join_room.on('error_joining_room', (error_message) => {
                 console.log(error_message);
                 setErrorJoinRoom(error_message);
             });
@@ -37,11 +51,16 @@ function JoinRoom() {
                 <div>
                     <p>{error_join_room}</p>
                     <input type="text"
+                     style={{width: '190px', height: '50px', backgroundColor: 'transparent', borderWidth: '0.25px', paddingLeft: '10px'}}
                     onChange={(e) => setJoiningRoomName(e.target.value)}
                      placeholder='Type room name...' />
-                    <div>
-                        <button onClick={() => JoinRoom()}>Join</button>
-                        <button onClick={() => setOpenDialog(false)}>Close</button>
+                    <div style={{display: 'flex', flexDirection: 'row'}}>
+                        <button 
+                        style={{width: '100px', height: '40px', backgroundColor: 'transparent', borderRadius: '5px', borderWidth: '0.5px',}}
+                        onClick={() => JoinRoom()}>Join</button>
+                        <button
+                        style={{width: '100px', height: '40px', backgroundColor: 'transparent', borderRadius: '5px', borderWidth: '0.5px',}}
+                        onClick={() => setOpenDialog(false)}>Close</button>
                     </div>
                 </div>
             }

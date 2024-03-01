@@ -5,7 +5,7 @@ const initialState = {
 
 const SetMembers = (state = initialState, action) => {
     switch (action.type) {
-        case '' :
+        case 'SetMembers' :
         return {
             ...state,
             members: action.payload
