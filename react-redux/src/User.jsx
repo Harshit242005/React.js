@@ -62,8 +62,8 @@ function User() {
         }
         
         // listen for the members array and sending the members 
-        remove_room.on('members', (ids_data) => {
-            console.log(`members ids: ${ids_data}`);
+        remove_room.on('members', (ids_data, activeConnectionObject) => {
+            console.log(`members ids: ${ids_data} and ${activeConnectionObject}`);
             // dispatching Member action to add the data in the current state
             dispatch(Member(ids_data));
         });

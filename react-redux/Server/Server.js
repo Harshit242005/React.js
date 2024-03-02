@@ -162,9 +162,13 @@ io.on('connection', (socket) => {
       const members = member_list[1];
       console.log(`members are: ${members}`);
       socket.emit('joined_room', room_name);
-      // send all the member id to all the connected clinet 
-      // so they can reflect the changes in it 
-      socket.emit('members', Array.from(members));
+
+      const activeConnectionsObj = {};
+      for (const [key, value] of activeConnections) {
+        activeConnectionsObj[key] = value;
+      }
+
+      io.emit('members', Array.from(members), activeConnectionsObj);
 
       console.log(activeConnections);
       console.log(activeRooms);
@@ -262,6 +266,41 @@ app.post('/Login', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
+// defining an endpoint for handling the user id and sending data back from the database
+app.get('/user/:userId', async (req, res) => {
+  const userId = req.params.userId;
+  console.log(`Getting user data for: ${userId}`);
+
+  const client = await MongoClient.connect('mongodb+srv://agreharshit610:i4ZnXRbFARI4kaSl@taskhandler.u5cgjfw.mongodb.net/')
+  const db = client.db('State');
+  // MongoDB Collection
+  const userCollection = db.collection('Users');
+
+  try {
+    // Find the user document with the given userId
+    const user = await userCollection.findOne({ _id: userId });
+
+    if (user) {
+      // Extract Username and Image from the user document
+      const { Username, Image } = user;
+
+      // Send the extracted data to the frontend
+      res.json({ Username, Image });
+    } else {
+      // User not found
+      res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    // Close the MongoDB connection
+    client.close();
+  }
+});
+
 
 
 // http server listening endpoint

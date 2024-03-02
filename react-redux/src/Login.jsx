@@ -45,7 +45,9 @@ function Login() {
 
   return (
     <div className={styles.body}>
-        {navigate && <Link to="/Interface"><button>Interface</button></Link>}
+        {navigate && <Link to="/Interface"><button
+        className={styles.loginButton}
+        >Interface</button></Link>}
       <input
       className={styles.inputBox}
         type="text"
