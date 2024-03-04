@@ -31,7 +31,8 @@ function JoinRoom() {
                 dispatch(existInRoom(true));
             });
 
-            // listen for the members array and sending the members 
+            // listen for the members array and sending the members
+            // i hope this listen for global emit function
             join_room.on('members', (ids_data, activeConnectionObject) => {
                 console.log(`members ids: ${ids_data} and ${activeConnectionObject}`);
                 // dispatching Member action to add the data in the current state

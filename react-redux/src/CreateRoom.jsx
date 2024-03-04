@@ -26,15 +26,15 @@ function CreateRoom() {
     // get the dispatch
     const dispatch = useDispatch();
 
-    const socket_create_room = io('http://localhost:3000');
 
-    useEffect(() => {
+    const createSocket = () => {
+        const socket_create_room = io('http://localhost:3000');
+        console.log('creating room', socketId, roomName);
+        // Send data directly, not as a callback function
+        socket_create_room.emit('createRoom', socketId.toString(), roomName);
 
-        socket_create_room.on('error_on_creating_room', (data) => {
-            setErrorMessage(data);
-        });
 
-        // setting the room name 
+        // listen for websokcet if the connection is commited
         socket_create_room.on('createdRoom', (data) => {
             console.log('room has been created successfully');
             // add the created room name in redux
@@ -46,16 +46,12 @@ function CreateRoom() {
             // on successful room creation hide the dialog to add the name for the 
             setOpenDialog(false)
         });
+        
 
-        return () => {
-            socket_create_room.disconnect();
-        };
-    }, [socket_create_room, dispatch, roomName]);
-
-    const createSocket = () => {
-        console.log('creating room', socketId, roomName);
-        // Send data directly, not as a callback function
-        socket_create_room.emit('createRoom', socketId.toString(), roomName);
+        // listen for if the room creation become unsuccessful
+        socket_create_room.on('error_on_creating_room', (data) => {
+            setErrorMessage(data);
+        });
     };
 
     return (

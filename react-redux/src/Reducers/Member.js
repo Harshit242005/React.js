@@ -1,6 +1,6 @@
 // reducer for member 
 const initialState = {
-    members: null,
+    members: [],
 }
 
 const SetMembers = (state = initialState, action) => {

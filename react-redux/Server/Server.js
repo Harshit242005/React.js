@@ -163,15 +163,19 @@ io.on('connection', (socket) => {
       console.log(`members are: ${members}`);
       socket.emit('joined_room', room_name);
 
+      // sending the current new joined members in the socket reponse to update the UI
       const activeConnectionsObj = {};
       for (const [key, value] of activeConnections) {
         activeConnectionsObj[key] = value;
       }
 
-      io.emit('members', Array.from(members), activeConnectionsObj);
-
+      console.log(`current members are: ${members} and connections: ${activeConnectionsObj}`);
       console.log(activeConnections);
       console.log(activeRooms);
+
+      
+      io.emit('members', Array.from(members), activeConnectionsObj);
+      
     }
     else {
       socket.emit('error_joining_room', 'Error joining errom! Room does not exist');
@@ -305,6 +309,8 @@ app.get('/user/:userId', async (req, res) => {
 
 // http server listening endpoint
 httpServer.listen(3000);
+
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
