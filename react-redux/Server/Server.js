@@ -7,7 +7,7 @@ const MongoClient = require('mongodb').MongoClient;
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-
+const { ObjectId } = require('mongodb');
 const app = express();
 const { createServer } = require("http");
 const { Server } = require("socket.io");
@@ -154,12 +154,14 @@ io.on('connection', (socket) => {
       const member_list = activeRooms.get(room_name);
       member_list[1].push(socketId);
 
+      const creater_of_room = activeRooms.get(room_name)[0];
       // add the name in the array of the active connections
       const user_data_list = activeConnections.get(socketId);
       user_data_list.push(room_name);
-
+      console.log(`creater of the room is: ${creater_of_room}`);
       // getting the members 
       const members = member_list[1];
+      members.push(creater_of_room);
       console.log(`members are: ${members}`);
       socket.emit('joined_room', room_name);
 
@@ -275,7 +277,7 @@ app.post('/Login', async (req, res) => {
 // defining an endpoint for handling the user id and sending data back from the database
 app.get('/user/:userId', async (req, res) => {
   const userId = req.params.userId;
-  console.log(`Getting user data for: ${userId}`);
+  console.log(`Getting user data for: ${userId} and ${typeof userId}`);
 
   const client = await MongoClient.connect('mongodb+srv://agreharshit610:i4ZnXRbFARI4kaSl@taskhandler.u5cgjfw.mongodb.net/')
   const db = client.db('State');
@@ -284,15 +286,17 @@ app.get('/user/:userId', async (req, res) => {
 
   try {
     // Find the user document with the given userId
-    const user = await userCollection.findOne({ _id: userId });
+    const user = await userCollection.findOne({ _id: new ObjectId(userId) });
 
     if (user) {
+      console.log('user found');
       // Extract Username and Image from the user document
       const { Username, Image } = user;
 
       // Send the extracted data to the frontend
-      res.json({ Username, Image });
+      res.json([ Username, Image ]);
     } else {
+      console.log('user not found');
       // User not found
       res.status(404).json({ error: 'User not found' });
     }

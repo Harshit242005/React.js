@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import styles from './Styles/InterfaceButtons.module.css';
 import { useDispatch } from 'react-redux';
-import { accessRoom, existInRoom, RoomName, Member } from './Action';
+import { accessRoom, existInRoom, RoomName } from './Action';
 import { io } from 'socket.io-client';
 import useSocket from './useSocket';
 
@@ -31,13 +31,12 @@ function JoinRoom() {
                 dispatch(existInRoom(true));
             });
 
-            // listen for the members array and sending the members
-            // i hope this listen for global emit function
-            join_room.on('members', (ids_data, activeConnectionObject) => {
-                console.log(`members ids: ${ids_data} and ${activeConnectionObject}`);
-                // dispatching Member action to add the data in the current state
-                dispatch(Member(ids_data));
-            });
+            // // listen for the members array and sending the members // i hope this listen for global emit function
+            // join_room.on('members', (ids_data, activeConnectionObject) => {
+            //     console.log(`members ids: ${ids_data} and ${activeConnectionObject}`);
+            //     // dispatching Member action to add the data in the current state
+            //     dispatch(Member(ids_data));
+            // });
 
             join_room.on('error_joining_room', (error_message) => {
                 console.log(error_message);

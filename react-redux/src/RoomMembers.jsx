@@ -6,6 +6,7 @@ import io from 'socket.io-client';
 import { Member } from './Action';
 import useSocket from './useSocket';
 import useRoom from './useRoom';
+import styles from './Styles/RoomMember.module.css';
 import axios from 'axios';
 function RoomMembers() {
   const dispatch = useDispatch();
@@ -13,110 +14,115 @@ function RoomMembers() {
   const { roomName } = useRoom();
 
   const { members } = useMembers();
-  const user_data_map = new Map();
-  // const [memberUserData, setMemberUserData] = useState([]);
-
+  console.log('members are: ', members);
 
   const [memberDocId, setMemberDocId] = useState([]);
+  const [userDataMap, setUserDataMap] = useState(new Map());
 
-  console.log(`members: ${members}`);
 
   const fetchUserData = async (userId) => {
     try {
       const response = await axios.get(`http://localhost:3001/user/${userId}`);
-      console.log(response);
-      const userData = await response.data;
-      return userData;
-    }
-    catch (error) {
+      const userData = response.data;
+      const [Username, Image] = userData;
+      return { Username, Image }; // Return an object instead of an array
+    } catch (error) {
       console.log(`Error while fetching the user data: ${error}`);
+      return null; // Handle the error and return null or a default value
     }
   }
+
+
 
   useEffect(() => {
     const socket = io('http://localhost:3000');
 
-    socket.on('members', (members_ids, activeConnectionObject) => {
-      // dispatching the ids for the members actions
+    socket.on('members', async (members_ids, activeConnectionObject) => {
+      console.log(`directly receving ids from the socket server: ${members_ids}`);
       dispatch(Member(members_ids));
 
+      const newUserDataMap = new Map();
+      const usersIds = [];
 
-      console.log(`loading members ids for the room members component directly: ${members_ids}
-      and active connection object is: ${activeConnectionObject}`);
+      if (Symbol.iterator in Object(activeConnectionObject)) {
+        // If it's an iterable object, use entries()
+        await Promise.all(
+          Array.from(activeConnectionObject.entries()).map(async ([memberSocketId, [userId, status, roomname]]) => {
+            if (memberSocketId !== socketId && roomname === roomName) {
+              usersIds.push(userId);
 
-      // to store the user doc id's from the mongodatabase document
-      const userDocIds = [];
-      // Destructure the activeConnectionObject
-      for (const [memberSocketId, [userId, status, roomname]] of Object.entries(activeConnectionObject)) {
-        if (memberSocketId !== socketId && roomname === roomName) {
-          // Append the subarray to the memberDocId state
-          userDocIds.push(userId);
-          // directly save the details in the map with the fetching of it's data 
-          const second_user_data = [memberSocketId, userId, status];
-          
-          const first_user_data = fetchUserData(userId);
-          // adding the member in the user map
-          user_data_map[memberSocketId] = [first_user_data, second_user_data];
-          console.log(user_data_map);
+              const second_user_data = [memberSocketId, userId, status];
+              const first_user_data = await fetchUserData(userId);
+
+              console.log(`second array data of the user: ${second_user_data}`);
+              console.log(`first array user data: ${first_user_data}`);
+
+              // Check if user data is fetched successfully
+              if (first_user_data) {
+                newUserDataMap.set(memberSocketId, [first_user_data, second_user_data]);
+              }
+            }
+          })
+        );
+      } else {
+        // If it's not iterable, loop through the keys
+        for (const memberSocketId of Object.keys(activeConnectionObject)) {
+          console.log(memberSocketId);
+          console.log(activeConnectionObject[memberSocketId]);
+          const [userId, status, roomname] = activeConnectionObject[memberSocketId];
+
+          if (roomname === roomName) {
+            usersIds.push(memberSocketId);
+
+            const second_user_data = [memberSocketId, userId, status];
+            const first_user_data = await fetchUserData(userId);
+
+            console.log(`second array data of the user: ${second_user_data}`);
+            console.log(`first array user data: ${first_user_data}`);
+
+            // Check if user data is fetched successfully
+            if (first_user_data) {
+              newUserDataMap.set(memberSocketId, [first_user_data, second_user_data]);
+            }
+          }
+          else {
+            console.log(roomname);
+            console.log('not been able to show the user data check for error');
+          }
         }
-        console.log(`Socket ID: ${socketId}, User ID: ${userId}, Status: ${status}, Username: ${roomname}`);
       }
-      // set the user doc id's in the useState empty array
-      setMemberDocId(userDocIds);
-      console.log(`member doc id array is: ${memberDocId}`);
-      // calling for the function to get the user data
-      // fetchUserDataForMembers();
+
+      setMemberDocId(usersIds);
+      setUserDataMap(newUserDataMap);
+      console.log(`user map structure is this: ${newUserDataMap}`);
+      console.log(`member docs ids for mongodb: ${memberDocId}`);
     });
-
-    // // function to fetch the user data for now 
-    // const fetchUserDataForMembers = async () => {
-    //   console.log('calling for user data fetching function');
-    //   const userDataPromises = memberDocId.map(async ([memberSocketId, userId, status]) => {
-    //     const fetchedData = await fetchUserData(userId);
-    //     return { memberSocketId, userId, status, ...fetchedData };
-    //   });
-
-    //   const userDataResults = await Promise.all(userDataPromises);
-    //   console.log(`result of the fetched data from the promise is: ${userDataResults}`);
-    //   setMemberUserData(userDataResults);
-    // };
-  });
+  }, [socketId, roomName, dispatch, memberDocId]);
 
   return (
     <div>
-      
 
-      {/* fetching user data from the stored procedure arrays  */}
-      {/* {memberUserData && memberUserData.length > 0 ? (
+      {/* shoowing user data on behalf of the map */}
+      {userDataMap.size > 0 ? (
         <div>
-          
-          {memberUserData.map((user) => (
-            <div key={user.userId}>
-              <p>User ID: {user.userId}</p>
-              <p>Username: {user.Username}</p>
-              <p>Status: {user.status}</p>
-             
+          {Array.from(userDataMap.entries()).map(([memberSocketId, [first_user_data, second_user_data]]) => (
+            <div key={memberSocketId}>
+              {/* Display image and user name */}
+              <div className={styles.userStatus}>
+                <div className={styles.userData}>
+                  <img className={styles.usersImage} src={`data:image/png;base64,${first_user_data.Image}`} alt="User" />
+                  <p>{first_user_data.Username}</p>
+                </div>
+                {/* Display status */}
+                <button className={styles.statusButton} disabled>{second_user_data[2]}</button>
+              </div>
             </div>
           ))}
         </div>
       ) : (
-        <p>No one has joined the room yet</p>
-      )} */}
+        <p>No member has joined the room yet!</p>
+      )}
 
-
-      {/* shoowing user data on behalf of the map */}
-      {Array.from(user_data_map.entries()).map(([memberSocketId, [first_user_data, second_user_data]]) => (
-        <div key={memberSocketId}>
-          {/* Display image and user name */}
-          <img src={first_user_data.image} alt="User" />
-          <p>{first_user_data.user_name}</p>
-          
-          {/* Display status */}
-          <p>Status: {second_user_data.status}</p>
-        </div>
-      ))}
-
-      
     </div>
   );
 }
