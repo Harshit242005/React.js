@@ -33,13 +33,15 @@ function User() {
                 remove_room.emit('remove_room', (socketId, roomName));
 
                 // listen for successful removing of the room
-                remove_room.on('deleted_room', (deleted_message) => {
-                    console.log(deleted_message);
+                remove_room.on('deleted_room', (room_name) => {
+                    console.log(`room name: ${room_name} has been deleted`);
+
+
 
                     // send the dispatch functions in reverse
                     dispatch(RoomName(null));
                     dispatch(accessRoom(null));
-                    dispatch(existInRoom(true));
+                    dispatch(existInRoom(false));
                     
                 });
             });
@@ -56,7 +58,7 @@ function User() {
                     // send the dispatch functions in reverse
                     dispatch(RoomName(null));
                     dispatch(accessRoom(null));
-                    dispatch(existInRoom(true));
+                    dispatch(existInRoom(false));
                 })
             });
         }

@@ -63,6 +63,20 @@ io.on('connection', (socket) => {
       userList[1] = state;
       console.log(activeConnections);
       io.emit('activeUsers', Array.from(activeConnections));
+
+      // emitting the members event to send the data
+      // sending the current new joined members in the socket reponse to update the UI
+      const activeConnectionsObj = {};
+      for (const [key, value] of activeConnections) {
+        activeConnectionsObj[key] = value;
+      }
+
+      console.log(`connections: ${activeConnectionsObj}`);
+      console.log(activeConnections);
+      console.log(activeRooms);
+
+
+      io.emit('members', activeConnectionsObj);
     }
   });
 
@@ -98,18 +112,32 @@ io.on('connection', (socket) => {
 
     if (activeRooms.has(roomName)) {
       // remove the room
+      const get_room_creater_id = activeRooms.get(roomName)[0];
+
       // get the member list first 
       const member_list = activeRooms.get(roomName)[1];
       console.log(`member list is: ${member_list}`);
+      member_list.push(get_room_creater_id);
 
+      // Run a for loop to delete the room name from each person id
+      member_list.forEach(memberSocketId => {
+        const user_data_list = activeConnections.get(memberSocketId);
+        if (user_data_list) {
+          // Check if the last value of the value array is equal to the roomName
+          if (user_data_list[user_data_list.length - 1] === roomName) {
+            // Pop the last value from the value array
+            user_data_list.pop();
+          }
+        }
+      });
 
+      // remove from the 
       activeRooms.delete(roomName);
-      socket.emit('deleted_room', 'Room has been deleted successfully');
-      console.log('room has been deleted successfully');
 
-      // add the name in the array of the active connections
-      const user_data_list = activeConnections.get(socketId);
-      user_data_list.pop();
+
+      // send an emit for notifying room has been destroyed
+      io.emit('deleted_room', (roomName));
+      console.log('room has been deleted successfully');
 
     }
     else {
@@ -130,13 +158,31 @@ io.on('connection', (socket) => {
       if (index !== -1) {
         // Remove the socketId from the member list
         member_list[1].splice(index, 1);
-        socket.emit('members', Array.from(member_list));
+
+
         console.log(`User with socketId ${socketId} left the room ${roomName}`);
-        // send an emit to get know that user has got the connect value
+        // send an emit to get know that user has left the room
         socket.emit('leaved_room', 'You have leaved the room successfully');
-        // add the name in the array of the active connections
+
+        // remove the room name from the connection user data list 
         const user_data_list = activeConnections.get(socketId);
-        user_data_list.pop();
+        if (user_data_list[-1] == roomName) {
+          user_data_list.pop();
+        }
+
+        // sending the current new joined members in the socket reponse to update the UI
+        const activeConnectionsObj = {};
+        for (const [key, value] of activeConnections) {
+          activeConnectionsObj[key] = value;
+        }
+
+        console.log(`connections: ${activeConnectionsObj}`);
+        console.log(activeConnections);
+        console.log(activeRooms);
+
+
+        io.emit('members', activeConnectionsObj);
+
       } else {
         console.log('socketId does not exist in the member list');
       }
@@ -175,9 +221,8 @@ io.on('connection', (socket) => {
       console.log(activeConnections);
       console.log(activeRooms);
 
-      
-      io.emit('members', Array.from(members), activeConnectionsObj);
-      
+
+      io.emit('members', activeConnectionsObj);
     }
     else {
       socket.emit('error_joining_room', 'Error joining errom! Room does not exist');
@@ -294,7 +339,7 @@ app.get('/user/:userId', async (req, res) => {
       const { Username, Image } = user;
 
       // Send the extracted data to the frontend
-      res.json([ Username, Image ]);
+      res.json([Username, Image]);
     } else {
       console.log('user not found');
       // User not found

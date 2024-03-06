@@ -3,7 +3,7 @@ import useMembers from './useMembers';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import io from 'socket.io-client';
-import { Member } from './Action';
+// import { Member } from './Action';
 import useSocket from './useSocket';
 import useRoom from './useRoom';
 import styles from './Styles/RoomMember.module.css';
@@ -12,6 +12,8 @@ function RoomMembers() {
   const dispatch = useDispatch();
   const { socketId } = useSocket();
   const { roomName } = useRoom();
+
+  console.log(`socket id is: ${socketId} and room name is: ${roomName}`);
 
   const { members } = useMembers();
   console.log('members are: ', members);
@@ -37,9 +39,9 @@ function RoomMembers() {
   useEffect(() => {
     const socket = io('http://localhost:3000');
 
-    socket.on('members', async (members_ids, activeConnectionObject) => {
-      console.log(`directly receving ids from the socket server: ${members_ids}`);
-      dispatch(Member(members_ids));
+    socket.on('members', async (activeConnectionObject) => {
+      // console.log(`directly receving ids from the socket server: ${members_ids}`);
+      // dispatch(Member(members_ids));
 
       const newUserDataMap = new Map();
       const usersIds = [];
@@ -48,7 +50,7 @@ function RoomMembers() {
         // If it's an iterable object, use entries()
         await Promise.all(
           Array.from(activeConnectionObject.entries()).map(async ([memberSocketId, [userId, status, roomname]]) => {
-            if (memberSocketId !== socketId && roomname === roomName) {
+            if (memberSocketId.toString() != socketId.toString() && roomname == roomName) {
               usersIds.push(userId);
 
               const second_user_data = [memberSocketId, userId, status];
@@ -62,16 +64,19 @@ function RoomMembers() {
                 newUserDataMap.set(memberSocketId, [first_user_data, second_user_data]);
               }
             }
+            else {
+              console.log(`${memberSocketId} and ${socketId} does match`)
+            }
           })
         );
       } else {
         // If it's not iterable, loop through the keys
         for (const memberSocketId of Object.keys(activeConnectionObject)) {
           console.log(memberSocketId);
-          console.log(activeConnectionObject[memberSocketId]);
+          
           const [userId, status, roomname] = activeConnectionObject[memberSocketId];
 
-          if (roomname === roomName) {
+          if (memberSocketId.toString() != socketId.toString() && roomname === roomName) {
             usersIds.push(memberSocketId);
 
             const second_user_data = [memberSocketId, userId, status];
@@ -88,6 +93,7 @@ function RoomMembers() {
           else {
             console.log(roomname);
             console.log('not been able to show the user data check for error');
+            console.log(`${memberSocketId} and ${socketId} does not match`);
           }
         }
       }
@@ -107,14 +113,16 @@ function RoomMembers() {
         <div>
           {Array.from(userDataMap.entries()).map(([memberSocketId, [first_user_data, second_user_data]]) => (
             <div key={memberSocketId}>
-              {/* Display image and user name */}
-              <div className={styles.userStatus}>
-                <div className={styles.userData}>
-                  <img className={styles.usersImage} src={`data:image/png;base64,${first_user_data.Image}`} alt="User" />
-                  <p>{first_user_data.Username}</p>
+              <div className={styles.members}>
+                {/* Display image and user name */}
+                <div className={styles.userStatus}>
+                  <div className={styles.userData}>
+                    <img className={styles.usersImage} src={`data:image/png;base64,${first_user_data.Image}`} alt="User" />
+                    <p>{first_user_data.Username}</p>
+                  </div>
+                  {/* Display status */}
+                  <button className={styles.statusButton} disabled>{second_user_data[2]}</button>
                 </div>
-                {/* Display status */}
-                <button className={styles.statusButton} disabled>{second_user_data[2]}</button>
               </div>
             </div>
           ))}
@@ -126,5 +134,4 @@ function RoomMembers() {
     </div>
   );
 }
-
 export default RoomMembers;
