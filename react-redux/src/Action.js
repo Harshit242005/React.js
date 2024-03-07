@@ -36,6 +36,12 @@ export const RoomName = (roomName) => ({
   payload: roomName
 });
 
+// listen foe the join room
+export const JoinRoomAsMember = (join_room) => ({
+  type: 'JoinRoom',
+  payload: join_room
+});
+
 // listening for either room create or joining the room
 export const existInRoom = (existRoom) => ({
   type: 'ExistInRoom',

@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import  { useState } from 'react'
 import styles from './Styles/InterfaceButtons.module.css';
 import { useDispatch } from 'react-redux';
-import { accessRoom, existInRoom, RoomName } from './Action';
+import { accessRoom, existInRoom, JoinRoomAsMember } from './Action';
 import { io } from 'socket.io-client';
 import useSocket from './useSocket';
 
@@ -19,14 +19,14 @@ function JoinRoom() {
         
 
         join_room.on('connect', () => {
-            console.log(`joining room is: ${joining_room} and socket id: ${socketId}`);
+            //console.log(`joining room is: ${joining_room} and socket id: ${socketId}`);
             
             join_room.emit('joining_room', joining_room, socketId.toString());
 
             join_room.on('joined_room', (room_name) => {
                 console.log('successfully joined room', room_name);
                 // sending some dispatch functions 
-                dispatch(RoomName(room_name));
+                dispatch(JoinRoomAsMember(room_name));
                 dispatch(accessRoom('Member'));
                 dispatch(existInRoom(true));
             });
@@ -39,7 +39,7 @@ function JoinRoom() {
             // });
 
             join_room.on('error_joining_room', (error_message) => {
-                console.log(error_message);
+                //console.log(error_message);
                 setErrorJoinRoom(error_message);
             });
         });

@@ -11,10 +11,10 @@ import RoomMembers from './RoomMembers';
 
 function Interface() {
 
-    const userData = useSelector((state) => state.auth.userData);
-    console.log(userData);
+    //const userData = useSelector((state) => state.auth.userData);
+    //console.log(userData);
     const exist = useSelector((state) => state.exist.existInRoom);
-    console.log(`room exist state: ${exist}`);
+    //console.log(`room exist state: ${exist}`);
     
     return (
         <>

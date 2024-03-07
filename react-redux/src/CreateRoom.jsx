@@ -3,7 +3,7 @@
 // export default CreateRoom
 import { RoomName, existInRoom, accessRoom } from './Action';
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import styles from './Styles/InterfaceButtons.module.css';
 import useSocket from './useSocket';
 import io from 'socket.io-client';
@@ -29,14 +29,14 @@ function CreateRoom() {
 
     const createSocket = () => {
         const socket_create_room = io('http://localhost:3000');
-        console.log('creating room', socketId, roomName);
+        //console.log('creating room', socketId, roomName);
         // Send data directly, not as a callback function
         socket_create_room.emit('createRoom', socketId.toString(), roomName);
 
 
         // listen for websokcet if the connection is commited
         socket_create_room.on('createdRoom', (data) => {
-            console.log('room has been created successfully');
+            //console.log('room has been created successfully');
             // add the created room name in redux
             dispatch(RoomName(data));
             // send an another actions call for changing some another scripts to hide the create/join room div
@@ -44,7 +44,7 @@ function CreateRoom() {
             // pass down the access level
             dispatch(accessRoom('Leader'));
             // on successful room creation hide the dialog to add the name for the 
-            setOpenDialog(false)
+            setOpenDialog(false);
         });
         
 

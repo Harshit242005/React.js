@@ -21,7 +21,7 @@ function Signup() {
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64String = reader.result.split(',')[1];
-                console.log("Base64 string:", base64String);
+                //console.log("Base64 string:", base64String);
                 setProfileImage(base64String);
             };
             reader.readAsDataURL(file);

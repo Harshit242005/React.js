@@ -2,21 +2,24 @@
 import { useSelector, useDispatch } from 'react-redux';
 import styles from './Styles/User.module.css'
 import { useState, useEffect } from 'react';
-import { setSocketId, existInRoom, RoomName, accessRoom, Member } from './Action';
+import { setSocketId, existInRoom, RoomName, accessRoom } from './Action';
 // // for loging out of the application
 // import { logout } from './Action';
 import io from 'socket.io-client';
 import useSocket from './useSocket';
 import useRoom from './useRoom';
+import useRoomMember from './useMemberRoom';
 
 function User() {
     // get the access level
     const access = useSelector((state) => state.access.Access);
     const userData = useSelector((state) => state.auth.userData);
     const exist = useSelector((state) => state.exist.existInRoom);
-    console.log(userData);
+    // console.log(userData);
     const { socketId } = useSocket();
     const { roomName } = useRoom();
+
+    const { roomNameForMember } = useRoomMember();
     const [showOptions, setShowOptions] = useState(false);
     const [currentState, setCurrentState] = useState('Active');
     const dispatch = useDispatch();
@@ -29,7 +32,7 @@ function User() {
         if (access === 'Leader') {
             remove_room.on('connect', () => {
                 // send room name and socket id
-                console.log(`removing the room socket id is: ${socketId} and room name is: ${roomName}`);
+                //console.log(`removing the room socket id is: ${socketId} and room name is: ${roomName}`);
                 remove_room.emit('remove_room', (socketId, roomName));
 
                 // listen for successful removing of the room
@@ -49,7 +52,7 @@ function User() {
         else {
             remove_room.on('connect', () => {
                 // send room name and socket id
-                console.log(`leaving from room socket id is: ${socketId} and room name is: ${roomName}`);
+                //console.log(`leaving from room socket id is: ${socketId} and room name is: ${roomName}`);
                 remove_room.emit('leave_room', (socketId, roomName));
 
                 // listen for successful leaving the room
@@ -63,20 +66,20 @@ function User() {
             });
         }
         
-        // listen for the members array and sending the members 
-        remove_room.on('members', (ids_data, activeConnectionObject) => {
-            console.log(`members ids: ${ids_data} and ${activeConnectionObject}`);
-            // dispatching Member action to add the data in the current state
-            dispatch(Member(ids_data));
-        });
+        // // listen for the members array and sending the members 
+        // remove_room.on('members', (ids_data, activeConnectionObject) => {
+        //     console.log(`members ids: ${ids_data} and ${activeConnectionObject}`);
+        //     // dispatching Member action to add the data in the current state
+        //     dispatch(Member(ids_data));
+        // });
     }
 
     const setActivityState = (activity) => {
-        console.log(`current state: ${activity}`);
+        // console.log(`current state: ${activity}`);
         setCurrentState(activity);
 
        
-        console.log(`socket id for connection is: ${socketId}`);
+        // console.log(`socket id for connection is: ${socketId}`);
         const change_state_socket = io('http://localhost:3000');
         change_state_socket.on('connect', () => {
             // emit the state for the changes 
@@ -94,7 +97,7 @@ function User() {
         socket.on('connect', () => {
             // Now, socket.id is available
             const socketId = socket.id;
-            console.log('connected user id: ', socketId);
+            //console.log('connected user id: ', socketId);
             // calling for the actions to set the id for the actions
             dispatch(setSocketId(socketId));
 
@@ -102,17 +105,17 @@ function User() {
             socket.emit('login', socketId, userData.user._id.toString());
         });
 
-        // listening for the member list view to update it 
-        socket.on('members', (members_ids) => {
-            console.log(`members are ${members_ids}`);
+        // // listening for the member list view to update it 
+        // socket.on('members', (members_ids) => {
+        //     console.log(`members are ${members_ids}`);
 
             
-            dispatch(Member(members_ids))
-        });
+        //     dispatch(Member(members_ids))
+        // });
 
-        socket.on('activeUsers', (data) => {
-            console.log(data);
-        });
+        // socket.on('activeUsers', (data) => {
+        //     //console.log(data);
+        // });
 
         // Clean up the socket connection on component unmount
         return () => {
@@ -143,13 +146,13 @@ function User() {
                             </div>
                             <p>{userData.user.Username}</p>
                             {/* room name that we have created */}
-                            <p className={styles.roomName}>{roomName}</p>
+                            <p className={styles.roomName}>{roomName || roomNameForMember}</p>
                         </div>
                         <div className={styles.visibilityButtons}>
                             {exist && 
                             <button 
                             className={styles.leaveButton}
-                            onClick={() => LeaveRoom()}>Leave</button>
+                            onClick={LeaveRoom}>Leave</button>
                             }
                             {/* give button to leave the current room */}
                         <button onClick={() => setShowOptions(true)} className={styles.statusButton}>{currentState}</button>

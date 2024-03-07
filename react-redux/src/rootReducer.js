@@ -7,7 +7,7 @@ import CreateRoom from './Reducers/createRomm';
 import existInRoom from './Reducers/ExistInRoom';
 import AccessRoom from './Reducers/RoomStatus';
 import Member from './Reducers/Member';
-
+import JoinRoom from './Reducers/JoinRoom';
 const rootReducer = combineReducers({
     counter: counterReducer,
     auth: authReducer,
@@ -16,6 +16,7 @@ const rootReducer = combineReducers({
     exist: existInRoom,
     access: AccessRoom,
     memberids: Member,
+    join_room: JoinRoom
 });
 
 export default rootReducer;

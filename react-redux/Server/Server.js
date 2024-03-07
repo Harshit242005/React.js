@@ -33,7 +33,7 @@ const activeConnections = new Map();
 const activeRooms = new Map();
 
 io.on('connection', (socket) => {
-  console.log('New user connected with the socket id: ', socket.id);
+  // console.log('New user connected with the socket id: ', socket.id);
 
   socket.on('login', (socketId, userId) => {
     console.log(`User socket id is ${socketId} ${userId} logged in`);
@@ -51,8 +51,8 @@ io.on('connection', (socket) => {
 
     console.log(activeConnections);
 
-    // Emit the entire Map to all connected clients
-    io.emit('activeUsers', Array.from(activeConnections));
+    // // Emit the entire Map to all connected clients
+    // io.emit('activeUsers', Array.from(activeConnections));
   });
 
   // listen for the change state and change the state at the 1 index of the accepted id 
@@ -62,7 +62,7 @@ io.on('connection', (socket) => {
       const userList = activeConnections.get(socketId);
       userList[1] = state;
       console.log(activeConnections);
-      io.emit('activeUsers', Array.from(activeConnections));
+      // io.emit('activeUsers', Array.from(activeConnections));
 
       // emitting the members event to send the data
       // sending the current new joined members in the socket reponse to update the UI
@@ -239,8 +239,8 @@ io.on('connection', (socket) => {
 
     console.log(activeConnections);
 
-    // Emit the updated Map to all connected clients
-    io.emit('activeUsers', Array.from(activeConnections));
+    // // Emit the updated Map to all connected clients
+    // io.emit('activeUsers', Array.from(activeConnections));
   });
 });
 

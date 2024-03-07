@@ -26,9 +26,9 @@ function Login() {
       const userData = response.data;
 
       if (response.status == 200) {
-        console.log(userData);
-        console.log(userData.user);
-        console.log(userData.user._id.toString());
+        // console.log(userData);
+        // console.log(userData.user);
+        // console.log(userData.user._id.toString());
         
         dispatch(loginSuccess(userData));
         // navigate to the Interface

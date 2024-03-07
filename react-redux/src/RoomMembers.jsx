@@ -1,22 +1,26 @@
 // import React from 'react';
-import useMembers from './useMembers';
+// import useMembers from './useMembers';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import io from 'socket.io-client';
 // import { Member } from './Action';
 import useSocket from './useSocket';
 import useRoom from './useRoom';
+
 import styles from './Styles/RoomMember.module.css';
 import axios from 'axios';
+import useRoomMember from './useMemberRoom';
 function RoomMembers() {
   const dispatch = useDispatch();
   const { socketId } = useSocket();
   const { roomName } = useRoom();
+  const { roomNameForMember } = useRoomMember();
+  console.log('room name for leader is: ', roomName);
+  console.log('room name for member is: ', roomNameForMember);
+  console.log(`socket id is: ${socketId} and room name is: ${roomNameForMember}`);
 
-  console.log(`socket id is: ${socketId} and room name is: ${roomName}`);
-
-  const { members } = useMembers();
-  console.log('members are: ', members);
+  // const { members } = useMembers();
+  // console.log('members are: ', members);
 
   const [memberDocId, setMemberDocId] = useState([]);
   const [userDataMap, setUserDataMap] = useState(new Map());
@@ -50,7 +54,7 @@ function RoomMembers() {
         // If it's an iterable object, use entries()
         await Promise.all(
           Array.from(activeConnectionObject.entries()).map(async ([memberSocketId, [userId, status, roomname]]) => {
-            if (memberSocketId.toString() != socketId.toString() && roomname == roomName) {
+            if (memberSocketId.toString() != socketId.toString() && roomname.toLowerCase() === roomNameForMember.toLowerCase() || roomName.toLowerCase()) {
               usersIds.push(userId);
 
               const second_user_data = [memberSocketId, userId, status];
@@ -72,11 +76,12 @@ function RoomMembers() {
       } else {
         // If it's not iterable, loop through the keys
         for (const memberSocketId of Object.keys(activeConnectionObject)) {
-          console.log(memberSocketId);
+          console.log(memberSocketId, socketId);
           
           const [userId, status, roomname] = activeConnectionObject[memberSocketId];
-
-          if (memberSocketId.toString() != socketId.toString() && roomname === roomName) {
+          console.log(roomname, roomNameForMember, roomName);
+          if (memberSocketId.toString() !== socketId.toString() && roomname.toLowerCase() === roomNameForMember.toLowerCase() || roomName.toLowerCase()) {
+            console.log('user does not match and writing about that user');
             usersIds.push(memberSocketId);
 
             const second_user_data = [memberSocketId, userId, status];
@@ -103,7 +108,7 @@ function RoomMembers() {
       console.log(`user map structure is this: ${newUserDataMap}`);
       console.log(`member docs ids for mongodb: ${memberDocId}`);
     });
-  }, [socketId, roomName, dispatch, memberDocId]);
+  }, [socketId, roomName, dispatch, memberDocId, roomNameForMember]);
 
   return (
     <div>
