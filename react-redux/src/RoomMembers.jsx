@@ -9,21 +9,35 @@ import useRoom from './useRoom';
 
 import styles from './Styles/RoomMember.module.css';
 import axios from 'axios';
-import useRoomMember from './useMemberRoom';
+
 function RoomMembers() {
   const dispatch = useDispatch();
   const { socketId } = useSocket();
   const { roomName } = useRoom();
-  const { roomNameForMember } = useRoomMember();
+  
   console.log('room name for leader is: ', roomName);
-  console.log('room name for member is: ', roomNameForMember);
-  console.log(`socket id is: ${socketId} and room name is: ${roomNameForMember}`);
+
 
   // const { members } = useMembers();
   // console.log('members are: ', members);
 
   const [memberDocId, setMemberDocId] = useState([]);
   const [userDataMap, setUserDataMap] = useState(new Map());
+
+  // function to track the styles for the status button of the user
+  const getStatusButtonStyle = (status) => {
+    switch (status) {
+      case 'Active':
+        return styles.activeButton;
+      case 'Inactive':
+        return styles.inactiveButton;
+      case 'Break':
+        return styles.breakButton;
+      default:
+        return ''; // Default style or an empty string
+    }
+  };
+  
 
 
   const fetchUserData = async (userId) => {
@@ -54,7 +68,7 @@ function RoomMembers() {
         // If it's an iterable object, use entries()
         await Promise.all(
           Array.from(activeConnectionObject.entries()).map(async ([memberSocketId, [userId, status, roomname]]) => {
-            if (memberSocketId.toString() != socketId.toString() && roomname.toLowerCase() === roomNameForMember.toLowerCase() || roomName.toLowerCase()) {
+            if (memberSocketId.toString() != socketId.toString() && roomname.toLowerCase() === roomName.toLowerCase()) {
               usersIds.push(userId);
 
               const second_user_data = [memberSocketId, userId, status];
@@ -79,8 +93,8 @@ function RoomMembers() {
           console.log(memberSocketId, socketId);
           
           const [userId, status, roomname] = activeConnectionObject[memberSocketId];
-          console.log(roomname, roomNameForMember, roomName);
-          if (memberSocketId.toString() !== socketId.toString() && roomname.toLowerCase() === roomNameForMember.toLowerCase() || roomName.toLowerCase()) {
+          console.log(roomname, roomName);
+          if (memberSocketId.toString() !== socketId.toString() && roomname.toLowerCase() === roomName.toLowerCase()) {
             console.log('user does not match and writing about that user');
             usersIds.push(memberSocketId);
 
@@ -108,11 +122,11 @@ function RoomMembers() {
       console.log(`user map structure is this: ${newUserDataMap}`);
       console.log(`member docs ids for mongodb: ${memberDocId}`);
     });
-  }, [socketId, roomName, dispatch, memberDocId, roomNameForMember]);
+  }, [socketId, roomName, dispatch, memberDocId]);
 
   return (
-    <div>
-
+    <div className={styles.membersheaD}>
+      <p className={styles.roomMember}>Members</p>
       {/* shoowing user data on behalf of the map */}
       {userDataMap.size > 0 ? (
         <div>
@@ -126,7 +140,8 @@ function RoomMembers() {
                     <p>{first_user_data.Username}</p>
                   </div>
                   {/* Display status */}
-                  <button className={styles.statusButton} disabled>{second_user_data[2]}</button>
+                  <button className={`${styles.statusButton} ${getStatusButtonStyle(second_user_data[2])}`}
+                   disabled>{second_user_data[2]}</button>
                 </div>
               </div>
             </div>

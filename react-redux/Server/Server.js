@@ -94,11 +94,12 @@ io.on('connection', (socket) => {
       // get the list and add value in that list
       const room_list = activeRooms.get(roomName);
       room_list.push(socketId);
-      room_list.push([]);
+      // list to store the members seperated from the leader
+      // room_list.push([]);
       console.log(activeRooms);
       // here should be conditions added in the adding of the created room name as the user data
       // add the name in the end of the active connection
-      const user_data = activeConnections.get(socketId)
+      const user_data = activeConnections.get(socketId);
       user_data.push(roomName);
     }
 
@@ -106,44 +107,44 @@ io.on('connection', (socket) => {
 
   });
 
-  socket.on('remove_room', (socketId, roomName) => {
-    console.log('removing room');
-    console.log(socketId, roomName);
+  // socket.on('remove_room', (socketId, roomName) => {
+  //   console.log('removing room');
+  //   console.log(socketId, roomName);
 
-    if (activeRooms.has(roomName)) {
-      // remove the room
-      const get_room_creater_id = activeRooms.get(roomName)[0];
+  //   if (activeRooms.has(roomName)) {
+  //     // remove the room
+  //     const get_room_creater_id = activeRooms.get(roomName)[0];
 
-      // get the member list first 
-      const member_list = activeRooms.get(roomName)[1];
-      console.log(`member list is: ${member_list}`);
-      member_list.push(get_room_creater_id);
+  //     // get the member list first 
+  //     const member_list = activeRooms.get(roomName)[1];
+  //     console.log(`member list is: ${member_list}`);
+  //     member_list.push(get_room_creater_id);
 
-      // Run a for loop to delete the room name from each person id
-      member_list.forEach(memberSocketId => {
-        const user_data_list = activeConnections.get(memberSocketId);
-        if (user_data_list) {
-          // Check if the last value of the value array is equal to the roomName
-          if (user_data_list[user_data_list.length - 1] === roomName) {
-            // Pop the last value from the value array
-            user_data_list.pop();
-          }
-        }
-      });
+  //     // Run a for loop to delete the room name from each person id
+  //     member_list.forEach(memberSocketId => {
+  //       const user_data_list = activeConnections.get(memberSocketId);
+  //       if (user_data_list) {
+  //         // Check if the last value of the value array is equal to the roomName
+  //         if (user_data_list[user_data_list.length - 1] === roomName) {
+  //           // Pop the last value from the value array
+  //           user_data_list.pop();
+  //         }
+  //       }
+  //     });
 
-      // remove from the 
-      activeRooms.delete(roomName);
+  //     // remove from the 
+  //     activeRooms.delete(roomName);
 
 
-      // send an emit for notifying room has been destroyed
-      io.emit('deleted_room', (roomName));
-      console.log('room has been deleted successfully');
+  //     // send an emit for notifying room has been destroyed
+  //     io.emit('deleted_room', (roomName));
+  //     console.log('room has been deleted successfully');
 
-    }
-    else {
-      console.log('room does not exist for deleting');
-    }
-  });
+  //   }
+  //   else {
+  //     console.log('room does not exist for deleting');
+  //   }
+  // });
 
   socket.on('leave_room', (socketId, roomName) => {
     console.log('leaving room');
@@ -154,21 +155,25 @@ io.on('connection', (socket) => {
       const member_list = activeRooms.get(roomName);
 
       // Check if the socketId exists in the member list
-      const index = member_list[1].indexOf(socketId);
+      const index = member_list.indexOf(socketId);
       if (index !== -1) {
         // Remove the socketId from the member list
-        member_list[1].splice(index, 1);
+        member_list.splice(index, 1);
 
 
         console.log(`User with socketId ${socketId} left the room ${roomName}`);
-        // send an emit to get know that user has left the room
-        socket.emit('leaved_room', 'You have leaved the room successfully');
+       
 
         // remove the room name from the connection user data list 
         const user_data_list = activeConnections.get(socketId);
         if (user_data_list[-1] == roomName) {
           user_data_list.pop();
         }
+
+        console.log(`after leaving the room; ${activeConnections}`);
+
+         // send an emit to get know that user has left the room
+         socket.emit('leaved_room', 'You have leaved the room successfully');
 
         // sending the current new joined members in the socket reponse to update the UI
         const activeConnectionsObj = {};
@@ -198,17 +203,14 @@ io.on('connection', (socket) => {
     if (activeRooms.has(room_name)) {
       // room exist in the active rooms names 
       const member_list = activeRooms.get(room_name);
-      member_list[1].push(socketId);
+      member_list.push(socketId);
 
-      const creater_of_room = activeRooms.get(room_name)[0];
+      
       // add the name in the array of the active connections
       const user_data_list = activeConnections.get(socketId);
       user_data_list.push(room_name);
-      console.log(`creater of the room is: ${creater_of_room}`);
-      // getting the members 
-      const members = member_list[1];
-      members.push(creater_of_room);
-      console.log(`members are: ${members}`);
+      
+      
       socket.emit('joined_room', room_name);
 
       // sending the current new joined members in the socket reponse to update the UI
@@ -217,7 +219,7 @@ io.on('connection', (socket) => {
         activeConnectionsObj[key] = value;
       }
 
-      console.log(`current members are: ${members} and connections: ${activeConnectionsObj}`);
+      console.log(`connections: ${activeConnectionsObj}`);
       console.log(activeConnections);
       console.log(activeRooms);
 
